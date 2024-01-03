@@ -7,8 +7,8 @@
 // @match        *://*/*
 // @grant        none
 // @run-at       document-start
-// @updateURL    https://raw.githubusercontent.com/Brekit/0xTerminalHelper/main/0xTerminalHelper.js
-// @downloadURL  https://raw.githubusercontent.com/Brekit/0xTerminalHelper/main/0xTerminalHelper.js
+// @updateURL    https://raw.githubusercontent.com/Brekit/0xTerminalHelper/main/0xTerminalHelper
+// @downloadURL  https://raw.githubusercontent.com/Brekit/0xTerminalHelper/main/0xTerminalHelper
 // ==/UserScript==
 
 (function() {
