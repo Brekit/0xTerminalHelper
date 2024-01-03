@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         0xterminal Guess Analyzer @megajid
-// @namespace    http://tampermonkey.net/
+// @namespace    http://0xterminal.game/
 // @version      0.2
 // @description  Analyze word guess responses for a 0xterminal.
 // @author       Brekit
-// @match        *://*/*
+// @match        *://0xterminal.game/*
 // @grant        none
 // @run-at       document-start
 // @updateURL    https://raw.githubusercontent.com/Brekit/0xTerminalHelper/main/0xTerminalHelper
