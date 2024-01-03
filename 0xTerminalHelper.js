@@ -1,1 +1,83 @@
+// ==UserScript==
+// @name         0xterminal Guess Analyzer @jid888
+// @namespace    http://tampermonkey.net/
+// @version      0.2
+// @description  Analyze word guess responses for a 0xterminal.
+// @author       Brekit
+// @match        *://*/*
+// @grant        none
+// @run-at       document-start
+// @updateURL    https://raw.githubusercontent.com/Brekit/0xTerminalHelper/main/0xTerminalHelper.js
+// @downloadURL  https://raw.githubusercontent.com/Brekit/0xTerminalHelper/main/0xTerminalHelper.js
+// ==/UserScript==
 
+(function() {
+    'use strict';
+
+    const analyzeResponse = (data) => {
+        if (data.wordGuessHistory && data.words) {
+            const history = data.wordGuessHistory;
+            const words = data.words;
+            const excludedPositions = {};
+            history.forEach(histItem => {
+                if (histItem.amountGuessed === 0) {
+                    histItem.word.split('').forEach((letter, index) => {
+                        excludedPositions[index] = letter;
+                    });
+                }
+            });
+
+            const filteredWords = words.filter(word =>
+                                               word.split('').every((letter, index) =>
+                                                                    !excludedPositions[index] || excludedPositions[index] !== letter
+                                                                   ) && history.every(histItem =>
+                                                                                      histItem.amountGuessed === word.split('').reduce((count, letter, index) =>
+                                                                                                                                       count + (histItem.word[index] === letter ? 1 : 0), 0)
+                                                                                     )
+                                              );
+
+            const spanElements = Array.from(document.querySelectorAll('span'));
+
+            // Функция для выделения слова
+            const highlightWord = (word, color) => {
+                for (let i = 0; i < spanElements.length; i++) {
+                    let matches = true;
+                    for (let j = 0; j < word.length; j++) {
+                        if (i + j >= spanElements.length || spanElements[i + j].textContent.toUpperCase() !== word[j]) {
+                            matches = false;
+                            break;
+                        }
+                    }
+                    if (matches) {
+                        for (let j = 0; j < word.length; j++) {
+                            spanElements[i + j].style.color = color;
+                        }
+                        break; 
+                    }
+                }
+            };
+
+            spanElements.forEach(span => span.style.color = '');
+            filteredWords.forEach(word => {
+                highlightWord(word, 'green');
+            });
+        }
+    };
+
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+        const response = await originalFetch(...args);
+        response.clone().json().then(analyzeResponse).catch(() => {});
+        return response;
+    };
+
+    const originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url) {
+        this.addEventListener('load', function() {
+            try {
+                analyzeResponse(JSON.parse(this.responseText));
+            } catch(e) {}
+        });
+        originalOpen.apply(this, arguments);
+    };
+})();
